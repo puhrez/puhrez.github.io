@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    <head>
+	<title> Distributed Architectures: (Some) Take Aways | Michael Pérez</title>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0" name="viewport">
+        <meta name="description" content="Michael Pérez is a programmer, writer, and cook">
+        <meta name="og:title" content="Michael Pérez | Programmer, writer, cook">
+        <meta name="og:description" content="Michael Pérez is a programmer, writer, and cook">
+        <link href="../../styles.css" rel="stylesheet">
+	<link ref="shortcut icon" href="../../assets/favicon.ico">
+    </head>
+    <body>
+	<article id="post">
+            <main>
+		<h3>Distributed Architectures: (Some) Take Aways</h3>
+		<blockquote>The goal is to minimize the effect of a failure. Embrace the fact that failures will happen and design to handle them.</blockquote>
+		<p>This post will mostly be about how the above blockquote serves as the skeptical foundation untop of which highly-available systems are built. It may also speak to how high-availability and scalability are not mutually guaranteed, let's see.</p>
+		<p>In a general sense, distributed systems are, disregarding whatever canonical definition(s) exist(s), those which depend on communication mechanisms between internal entities to function correctly. Whether directly over networks, indirectly on a message bus, or through digital telepathy, communication implicitly divides the agents within these systems into non-mutually-exclusive categories of sender and reciever. A browser sends a request to a load balancer which then, according to some internal logic, sends it to a server, which in turn transforms into into a SQL statement to be send over a database connection. This forwarding of bits over the network can continue for a while from master to slave instances, to message queues, etc., and yet all these stops are application layer checkpoints, obfuscating the links, routers, gateways, and various components of network topology data flows through. Nevertheless, this procession eventually (a loaded word in this space) results in the original sender, that Firefox browser loaded on a PopOs laptop at a café in Puerto Rico, becoming the final receiver.</p>
+		<br>
+		<em>ad infinitum</em>
+		<br>
+		<p>With this logical division in mind, its helpful to think of the various tools systems developers have against <u>transient</u> failure as primarily fortifying one of these roles.</p>
+		<br>
+		<ul>Sender-side Mechanisms
+		    <li><strong>Retry</strong>: Keep trying the operation until successful.</li>
+		    <li><strong>Circuit Breaker</strong>: Keep retrying until a threshold of failures is reached, and wait for the service to verify its health.</li>
+		</ul>
+		<br>
+		<br>
+		<ul>Receiver-side Mechanisms
+		    <li><strong>Replication</strong>: Having clones of potentioanlly different functionaity to operationally support each other. Master-Master and Master-Subordinate are different approaches here.</li>
+		    <li><strong>Bulkhead</strong>: Isolatation protects correct services from the internal failure of incorrect ones.</li>
+		</ul>
+		<br>
+		<p>The above practices help one's system handle the temporary failure of other components in their system and in whatever system they may communication with. They are not appropriate, however, for failures that are more systemtic and require deeper recovery procedures than restarting a systemd service. For failures of this nature, there are other practices, these, however, are more general in their scope since they don't occupy themselves with the role of a component, but more of restoring a component, regardless of it's role. They can be divided though into recovery or routing techniques. The former concerns itself with how to bring a system back up after it's gone down, the latter with how to react to persistent, but localized, failures in systems components.</p>
+		<br>
+		<ul>Recovery Techniques
+		    <li><strong>Snapshots</strong>: Sort of a synonym for backup, these are moments of state of a system (component) that can be restored from</li>
+		    <li><strong>Event Sourcing</strong>: While it has a variety of benefits dealing with data consistency, one use of this technique of storing data transformations is the ability to playback the history of a system, allowing one to bring state back to any point in (recorded) time.</li>
+		</ul>
+		<br>
+		<br>
+		<ul>Routing Techniques
+		    <li><strong>Disaster Recovery</strong>: Although recovery is in it's name, Disaster Recovery is mainly about distributing clones of one system's topology so that if in some geographic region a terrible thing were to occur, one could route incoming traffic to non-affected areas. Active-active and Active-passive topologies are different approaches which differ in how each region is utilized in peace-time.</li>
+		</ul>
+		<br>
+		<br>
+		<p>Finally, a note about the relationship between availability and scalability.</p>
+		<p>Beginning with some semantics, scalability is the capacity of a system to adapt itself to dynamic levels of load. The ability for a given service to distribute its load among instances of itself is often a characteristic of a scalable system, however if a single instance is able to handle indefinite amounts of operations, this too is scalable. Availability, on another limb, is a characteristic of a system describing its likelihood of being available and ready to perform its task(s). Scalability and availability are often related in discourse because the former helps to account for the fallacies surrounding the dependencies of the latter. As an example, while a single instance of a service may be highly reliable because it's supported by a reliable power supply, a reliable network connection, and reliable internal devices, it's availability depends on the reliability of these parts it could not operate dependibly without. Scalability allows a system to mitigate the risk of depdning on <a href="http://www.rgoarchitects.com/Files/fallacies.pdf.">inherently unreliable components</a> by commoditizing services to the point that it's physical dependicies, which make it available, don't matter.</p>
+            </main>
+	    <a id="back" href="../index.html">.back</a>
+	</article>
+    </body>
+</html>

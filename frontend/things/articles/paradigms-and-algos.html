@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+    <head>
+	<title> Different approaches to algorithm implementation | Michael Pérez</title>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0" name="viewport">
+        <meta name="description" content="Michael Pérez is a programmer, writer, and cook">
+        <meta name="og:title" content="Michael Pérez | Programmer, writer, cook">
+        <meta name="og:description" content="Michael Pérez is a programmer, writer, and cook">
+        <link href="../../styles.css" rel="stylesheet">
+	<link ref="shortcut icon" href="../../assets/favicon.ico">
+    </head>
+    <body>
+	<article id="post">
+            <main>
+		<h3>Different approaches to algorithm implementation</h3>
+		<p>Let's consider first a cannonical, multi-paradigmal algorithm.</p>
+		<pre>		<code>
+# fib.py
+
+def fibo(n):
+    """The classic, functional approach to computing fibonacci numbers"""
+    if n <= 1:
+        return n
+    return fibo(n - 1) + fibo(n - 2)
+
+
+def iter_fibo(n):
+    """An imperative, iterative approach to computing fibonacci numbers"""
+    if n <= 1:
+        return n
+    prev, curr = 0, 1
+    for _ in range(n - 1):
+        prev, curr = curr, prev + curr
+
+    return curr
+		</code></pre>
+		<p>While minimal, the simplicity serves to highlight the differences between the implementations. We will disregard (important) runtime specifics, like the recursive approach's redundant computations and callstack hunger, and focus for a moment on their conceptual differences which are the prinicpal interest here.</p>
+		<p>Though seemingly innocous, the presence of local state in the <code>iter_fibo</code>, harmless as three variables may be, adds congitive load, circumvents intention, and complicates computation distribution in favor of space-time performance gains.</p>
+		<p>This, however, is the perogative of classical, imperative programming. Instead of allowing the programmer to declare what should be done, it imposes upon them the responsibility of detailing how something should be done, leaving the what, one must hope, to documentation.</p>
+		<p>Choosing a slightly more involved, yet equally canonnical example, we can better witness how these different approaches manifest their idiosyncasies.</p>
+		<pre><code>
+# merge_sort.py
+import math
+
+
+def merge_sort(a):
+    if len(a) <= 1:
+        return a
+
+    maybe_middle = math.floor(len(a)/2)
+
+    lower_half = merge_sort(a[:maybe_middle])
+    upper_half = merge_sort(a[maybe_middle:])
+
+    return _merge(lower_half, upper_half)
+
+
+def _merge(a, b):
+    res = []
+    while a and b:
+        if a[0] < b[0]:
+            res.append(a[0])
+            a = a[1:]
+        else:
+            res.append(b[0])
+            b = b[1:]
+
+    res += a if a else b
+    return res
+		</code></pre>
+		<pre></code>
+# merge_sort.ex
+
+defmodule Sort do
+  def merge_sort(xs) when is_list(xs) and length(xs) <= 1, do: xs
+
+  def merge_sort(xs) when is_list(xs) do
+    mid = :math.floor(length(xs) / 2) |> round
+
+    lower_half = merge_sort(Enum.slice(xs, 0..mid - 1))
+    upper_half = merge_sort(Enum.slice(xs, mid..-1))
+    merge(lower_half, upper_half)
+  end
+
+  defp merge(a, [], acc), do: acc ++ a
+  defp merge([], b, acc), do: acc ++  b
+  defp merge([h | t], b, acc) when h <= hd b do
+    merge(t, b, acc ++ [h])
+  end
+  defp merge(a, [h | t], acc) when h < hd a do
+    merge(a, t,  acc ++ [h])
+  end
+  defp merge(a, b), do: merge(a, b,  [])
+end
+		</code></pre>
+		<p>You'll notice that these implementations of merge sort are quite similiar. They both follow divide and conquer in the same way and their entrypoints basically read the same. Basic similiarity is a far  as the family resemblence goes however because even in <code>merge_sort</code> their approaches diverge in how each expresses functionality.</p>
+		<p>Although being able to isolate the recursive base case in Elixir via multiple dispatch isn't of much significance, it succiciently demonstrates how the functional mindset differentiates the Elxir version of <code>merge</code>. Like the previous fibonacci example, where the imperative approach required the developer to consider and program what to do at every iteration (and even after the iteration concluded), Python's <code>merge</code> imperative underpinnings result in an understandable, yet circuitous, implementation..</p>
+		<p>Since, however, Elixir is a functional progamming language that disallows mutation, discourages indexing, but permits function guards and multiple dispatch, we can write <code>merge</code> in a much more explicit way; dividing the logic into private functions using declarative, pattern matched argument values to isolate the different cases merge sort specifies.</p>
+            </main>
+	    <a id="back" href="../index.html">.back</a>
+	</article>
+    </body>
+</html>

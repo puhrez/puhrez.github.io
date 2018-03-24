@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+    <head>
+	<title> Distributed Architecture: A Biographeme | Michael Pérez</title>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0" name="viewport">
+        <meta name="description" content="Michael Pérez is a programmer, writer, and cook">
+        <meta name="og:title" content="Michael Pérez | Programmer, writer, cook">
+        <meta name="og:description" content="Michael Pérez is a programmer, writer, and cook">
+        <link href="../../styles.css" rel="stylesheet">
+	<link ref="shortcut icon" href="../../assets/favicon.ico">
+    </head>
+    <body>
+	<article id="post">
+            <main>
+		<h3>Distributed Architecture: A Biographeme</h3>
+		<em>A personally curated subset of Microsoft's  <a href="https://www.edx.org/course/architecting-distributed-cloud-microsoft-devops200-9x-1">Architecting Distributed Cloud Applications</a></em>
+		<hr>
+		<p>The goal is to minimize the effect of a failure. Embrace the fact that failures will happen and design to handle them.</p>
+		<p>Protect failing remote services (Circuit Breaker). It's good to retry after a transient failure, but if the failure persists, you can end up with too many callers hitting a failing service.</p>
+		<p>Degrade gracefully. Sometimes you can't work around a problem, but you can provide reduced functionality that is still useful.</p>
+		<p>Better isolation can increase the security and reliability of applications, while increased density can reduce the costs of operating applications.</p>
+		<p>Continuous integration (CI) is the practice of merging all developer code into a central codebase on a regular schedule, and then automatically performing standard build and test processes.</p>
+		<p>Continuous delivery (CD) is the practice of ensuring that code is always ready to deploy, by automatically building, testing, and deploying code to production-like environments.</p>
+		<p>Continuous deployment (CD) is an additional process that automatically takes any updates that have passed through the CI/CD pipeline and deploys them into production.</p>
+		<p>Isolate critical resources (Bulkhead). Failures in one subsystem can sometimes cascade. This can happen if a failure causes some resources, such as threads or sockets, to not be freed in a timely manner, leading to resource exhaustion.</p>
+		<p>Peter Deutsch originally drafted 7 assumptions that systems architects make in 1994. Later, James Gosling added the 8th, and now they are called the <a href="http://www.rgoarchitects.com/Files/fallacies.pdf.">"8 fallacies of distributed computing"</a></p>
+		<p>A request comes to a PC, identified by an IP address, and the TCP stack on that PC delivers it to the TCP socket, identified by the port number. With multiple containers on the same IP, and potentially trying to listen on the same port, this is a problem. </p>
+		<p>The common workarounds include network address translation (NAT), routing tables and potentially changes to the client code.</p>
+		<p>There are two types of proxies, reverse proxies and forward proxies. Forward proxies have features to support client, and reverse proxies have features to support services.</p>
+		<p>Giving access to multiple services via endpoints cached in DNS, and going through extra hops may introduce extra complexity. It may be untenable to keep all of the endpoints in sync on the DNS as service instances come and go. The client must be robust to handle such situations and commonly this is done through retries.</p>
+		<p>A carefully-designed RESTful web API defines the resources, relationships, and navigation schemes that are accessible to client applications.</p>
+		<p>Some real life cases, when profiled, show 90% of the time the services spend time in serialization/deserialization code.</p>
+		<p>Versioning enables a web API to indicate the features and resources that it exposes, and a client application can submit requests that are directed to a specific version of a feature or resource.</p>
+		<p>As a best practice implement versioning from the start, always assume there is going to be a version 2.</p>
+		<p>As a general guideline, use an exponential back-off strategy for background operations, and immediate or regular interval retry strategies for interactive operations. In both cases, you should choose the delay and the retry count so that the maximum latency for all retry attempts is within the required end-to-end latency requirement.</p>
+		<p>What we want to have is Exactly Once Semantics. In the world where failures are embraced, and clients retry, we want to implement the services so that they are idempotent.</p>
+		<p>Messaging supports asynchronous operations, enabling you to decouple a process that consumes a service from the process that implements the service.</p>
+		<p>The queue length can be used to determine the need to scale the service up and down.</p>
+		<p>The messages might be processed out of order, and more than once, because of this mode of operation. The code should not make any assumptions that the messages are in order and it should be idempotent.</p>
+		<p>Time to live on the message. Allows the message to be processed only within a time limit. This prevents costs from skyrocketing if the consumers never process the messages.</p>
+		<p>In a rolling update we start by asking the orchestrator to remove two V1 instances and deploy two instances with V2 at a time, until all six instances are running V2.</p>
+		<p>Delete and Upload: For a service running V1 of the code, we can instruct the orchestrator to stop the service, delete the deployment, and deploy a new one with the V2 code. This is an easy and cheap strategy. The only downside is there is a period of time where the clients will not be receiving any response from the service. However, if these services are behind a message queue this is not a problem.</p>
+		<p>Blue-green deployment is a strategy used to reduce downtime during deployments by running two identical production environments called Blue and Green.</p>
+		<p>All of the traffic can be immediatly routed to the Green enviroment or a portion of the traffic can be slowly transitioned over time allowing it to ramp up. The Blue environment is now idle. If there's a problem it's easy to rollback the deployment and route the traffic back to the Blue environment.</p>
+		<p>It is possible to use a different update option on the same service at different times. Delete and upload updates may cause downtime.</p>
+		<p>You will want to make sure the service instance shuts down in a graceful way so any in-flight client requests being processed by the service completes before it's shutdown.</p>
+		<p>Consider using cryptographic message syntax (CMS) when storing those secrets, to avoid putting them in clear text. You can find the details about the CMS specification in <a href="https://tools.ietf.org/html/rfc5652">IETF RFC5652</a>.</p>
+		<p>Following the twelve-factor services recommendations storing configuration in environment variables is a best practice.</p>
+		<p>Businesses use data to assess trends, trigger business processes, audit their operations, analyze customer behavior, and many other things. This heterogeneity means that a single data store is usually not the best approach. Instead, it's often better to store different types of data in different data stores, each focused on a specific workload or usage pattern. </p>
+		<p>Data that is frequently accessed is stored in fast store, and is also known as hot data. Infrequently accessed data, also known as warm data is stored in slightly slower and less expensive storage. As data is accessed less frequently it can be moved to slower storage, this data is known as cold data.</p>
+		<p>Caching is most effective when a client instance repeatedly reads the same data</p>
+		<p>Client-side caching is done by the process that provides the user interface for a system, such as a web browser or desktop application. Server-side caching is done by the process that provides the business services that are running remotely.</p>
+		<p>Object storage is optimized for storing and retrieving large binary objects</p>
+		<p>Using file shares enables files to be accessed across a network. Given appropriate security and concurrent access control mechanisms, sharing data in this way can enable distributed services to provide highly scalable data access for performing basic, low-level operations such as simple read and write requests.</p>
+		<p>A Content Delivery Network (CDN) caches content at strategically placed locations to provide maximum throughput for delivering content to users.</p>
+		<p> An relational database management systems (RDBMS) typically implements a transactionally consistent mechanism that conforms to the ACID (atomic, consistent, isolated, durable) model for updating information.</p>
+		<p>An RDBMS typically supports a schema-on-write model, where the data structure is defined ahead of time, and all read or write operations must use the schema. </p>
+		<p>An RDBMS is very useful when strong consistency guarantees are important—where all changes are atomic, and transactions always leave the data in a consistent state. However, the underlying structures do not lend themselves to scaling out by distributing storage and processing across machines.</p>
+		<p> Non-relational databases do not enforce a schema, an approach known as schema-on-read is used, and the application is allowed to include arbitrary keys and values.</p>
+		<p>The partitioning strategy must be chosen carefully to maximize the benefits while minimizing adverse effects. Partitioning can help improve scalability, reduce contention, and optimize performance.</p>
+		<p>Horizontal partitioning (often called sharding). In this strategy, each partition is a data store in its own right, but all partitions have the same schema.</p>
+		<p>Vertical partitioning. In this strategy, each partition holds a subset of the fields for items in the data store. The fields are divided according to their pattern of use.</p>
+		<p>Functional partitioning. In this strategy, data is aggregated according to how it is used by each bounded context in the system.</p>
+		<p>It’s important to note that the three strategies described here can be combined.</p>
+		<p>Use Master-Subordinate replication with read-only replicas to improve performance of queries. Locate the replicas close to the applications that access them and use simple one-way synchronization to push updates to them from a master database.</p>
+		<p>Use Master-Master replication to improve the scalability of write operations. Applications can write more quickly to a local copy of the data, but there is additional complexity because two-way synchronization (and possible conflict resolution) with other data stores is required.</p>
+		<p>Include in each replica any reference data that is relatively static, and is required for queries executed against that replica to avoid the requirement to cross the network to another datacenter.</p>
+		<p>In the strong consistency model, all changes are atomic. If a transaction updates multiple data items, the transaction is not allowed to complete until either all of the changes have been made successfully, or (in the event of a failure) they have all been undone. </p>
+		<p>In the eventual consistency model, data update operations that span multiple sites can ripple through the various data stores in their own time, without blocking concurrent application instances that access the same data.</p>
+		<p>For a developer, it is often more productive to interpret this theorem as "during a network partition, a distributed system must choose either consistency or availability".</p>
+		<p>Command and Query Responsibility Segregation (CQRS) is a pattern that segregates the operations that read data (queries) from the operations that update data (commands) by using separate interfaces. This means that the data models used for querying and updates are different.</p>
+		<p>The query model for reading data and the update model for writing data can access the same physical store, perhaps by using SQL views or by generating projections on the fly.</p>
+		<p>The read store can be a read-only replica of the write store, or the read and write stores can have a different structure altogether. Using multiple read-only replicas of the read store can greatly increase query performance and application UI responsiveness, especially in distributed scenarios where read-only replicas are located close to the application instances.</p>
+		<p>Separation of the read and write stores also allows each to be scaled appropriately to match the load.</p>
+		<p>The Event Sourcing pattern defines an approach to handling operations on data that's driven by a sequence of events, each of which is recorded in an append-only store. </p>
+		<p>Instead of storing just the current state of the data in a domain, use an append-only store to record the full series of actions taken on that data. The store acts as the system of record and can be used to materialize the domain objects. This can simplify tasks in complex domains, by avoiding the need to synchronize the data model and the business domain, while improving performance, scalability, and responsiveness. It can also provide consistency for transactional data, and maintain full audit trails and history that can enable compensating actions.</p>
+		<p>The CRUD approach has some limitations: In a collaborative domain with many concurrent users, data update conflicts are more likely because the update operations take place on a single item of data.</p>
+		<p>Notice that the application code that generates the events is decoupled from the systems that subscribe to the events.</p>
+		<p> In practice, this means that you can either: Provide a consistent view of distributed (partitioned) data at the cost of blocking access to that data while any inconsistencies are resolved... Provide immediate access to the data at the risk of it being inconsistent across sites.</p>
+		<p>Saga pattern: Coordinate a set of distributed actions as a single operation. If any of the actions fail, try to handle the failures transparently, or else undo the work that was performed, so the entire operation succeeds or fails as a whole.</p>
+		<p> In many cases the failures will be transient and can be handled by using the Retry pattern.</p>
+		<p>Pessimistic concurrency involves locking rows at the data source to prevent other users from modifying data in a way that affects the current user. In a pessimistic model, when a user performs an action that causes a lock to be applied, other users cannot perform actions that would conflict with the lock until the lock owner releases it.</p>
+		<p>For this reason, pessimistic concurrency is best implemented when lock times will be short, as in programmatic processing of records. Pessimistic concurrency is not a scalable option when users are interacting with data and causing records to be locked for relatively large periods of time.</p>
+		<p>Users who use optimistic concurrency do not lock a row when reading it. When a user wants to update a row, the application must determine whether another user has changed the row since it was read.</p>
+		<p>Optimistic concurrency can be implemented by the data source or the application.</p>
+		<p>Use formal, language-agnostic data schemas.</p>
+		<p>Data must specify version informtion starting with v1.</p>
+		<p>Document your data source fail over and fail back process and test it. Regularly test the instruction steps to verify that an operator following them is able to successfully fail over and fail back the data source.</p>
+		<p>Validate your data backups. Regularly verify that your backup data is what you expect by running a script to validate data integrity, schema, and queries. There's no point having a backup if it's not useful to restore your data sources.</p>
+		<p>Ensure that no single user account has access to both production and backup data. Your data backups are compromised if one single user account has permission to write to both production and backup sources.</p>
+		<p>Recovery time objective (RTO) is the maximum acceptable time that an application can be unavailable after an incident.</p>
+		<p>Recovery point objective (RPO) is the maximum duration of data loss that is acceptable during a disaster.</p>
+		<p> Another common metric is mean time to recover (MTTR), which is the average time that it takes to restore the application after a failure. MTTR is an empirical fact about a system. If MTTR exceeds the RTO, then a failure in the system will cause an unacceptable business disruption, because it won't be possible to restore the system within the defined RTO.</p>
+		<p>Disaster recovery (DR) is the ability to recover from rare but major incidents: non-transient, wide-scale failures, such as service disruption that affects an entire region. </p>
+		<p>An active-passive topology is the choice that many companies favor. n this scenario, there is a primary and a secondary region. All of the traffic goes to the active deployment on the primary region. The secondary region is better prepared for disaster recovery because the database is running on both regions. Additionally, a synchronization mechanism is in place between them.</p>
+		<p>In an active-active topology, the cloud services and database are fully deployed in both regions. Unlike the active-passive model, both regions receive user traffic. This option yields the quickest recovery time. There's additional complexity in determining how to route users to the appropriate region. Round-robin scheduling might be possible. </p>
+		<p>There is a downside to the active-active architecture... The second region must access the database in the first region because the master copy resides there. Performance significantly drops off when you access data from outside a region.</p>
+		<p>Decreasing RTO generally increases costs and complexity. The active-active topology deviates from this cost pattern. In the active-active topology, you might not need as many instances on the primary region as you would in the active-passive topology.</p>
+            </main>
+	    <a id="back" href="../index.html">.back</a>
+	</article>
+    </body>
+</html>
