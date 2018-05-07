@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+    <head>
+	<title> A Scheduling Problem | Michael Pérez</title>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0" name="viewport">
+        <meta name="description" content="Michael Pérez is a programmer, writer, and cook">
+        <meta name="og:title" content="Michael Pérez | Programmer, writer, cook">
+        <meta name="og:description" content="Michael Pérez is a programmer, writer, and cook">
+        <link href="../../styles.css" rel="stylesheet">
+	<link ref="shortcut icon" href="../../assets/favicon.ico">
+    </head>
+    <body>
+	<article id="post">
+            <main>
+		<h3>A Scheduling Problem</h3>
+		<p>The below is some commentary, reflection, and an implementation of a problem from: https://courses.edx.org/courses/course-v1:UCSanDiegoX+ALGS201x+2T2017. While this is probably against some terms of service or honor code, *shrug*. Since I've been doing other things that are not writing those algorithms posts I've been meaning to, this is me somewhat making it up to myself. Since really the whole goal of these writings is to orthogaphically manifest thought.</p>
+		<pre><code>
+/*
+  The basic idea of this problem is: given a set of threads, and a sequence of jobs that take some variable amount of time. When does which thread begin work on each job.
+  The original approach I took involved allocating runs, which was a job thread pair and a little metadata. This allowed one to keep track of which threads were busy and with what. However, this allocation process required a corresponding deallocation step in which I "freed" the threads and printed when they began a certain task. Keeping a deque of running jobs, freeing threads upon completion, and printing the task start after the fact was a rather circuitious way to solve the above problem. Moreover, the added complexity made bugs hard to squash since the data structure used for keeping track of running jobs changes as different problems were found.
+
+A key ideas for this problem was realizing that until the threadpool is emptied, time doesn't move forward since each thread has to be assigned a task "simultaniously" and that one didn't need to keep track of what was running where, but only when will a given thread be free next. The former significantly simplfied the time keeping and thread "freeing", and the later allowed one to not worry about "completing" jobs and focus only on when the next job could start.
+
+(Some) things learned:
+* thinking about the problem deeply is good, but sometimes reading into it too deeply leads to complicated solutions that obscure the actual task at hand.
+* every malloc needs a free (thank you valgrind).
+* Similiar to the first point, understanding how to calculate the output before youtry and programmatically compute it is a good idea.
+* Ensure your base data structures are well tested before venturing out into the wild
+ */
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <math.h>
+#include "utils.h"
+
+#define min_i(ai, bi, xs) ((xs[ai] <= xs[bi]) ? (ai) : (bi))
+#define MAXINPUT 1000
+
+typedef struct {
+  int capacity;
+  int size;
+  int *xs;
+} Heap;
+
+typedef struct {
+  int id;
+  int duration;
+} Job;
+
+Job **read_input(char *, int *, int *);
+void insert(Heap *, int);
+void siftupmin(Heap *, int);
+void swap(int *, int *);
+void siftdownmin(Heap *, int);
+int extract_min(Heap *);
+void print_heap(Heap *);
+void free_heap(Heap *);
+
+void init_threadpool(Heap *, int *);
+void process_job(Heap *, Job *, int *, int *);
+void free_threads(Heap *);
+
+Job *jalloc(int id, int duration) {
+  Job *j = (Job *) malloc(sizeof(Job));
+  j->id = id;
+  j->duration = duration;
+  return j;
+}
+
+
+Heap *halloc(int capacity) {
+  Heap *h = (Heap *) malloc(sizeof(Heap));
+  h->capacity = capacity;
+  h->size = 0;
+  h->xs = (int *) malloc(sizeof(int) * capacity);
+  return h;
+}
+
+void free_heap(Heap *h) {
+  free(h->xs);
+  free(h);
+}
+
+int main(int argc, char **argv) {
+
+  if (argc < 2 || argc > 2) {
+    fprintf(stderr, "Usage: %s <file>\n", argv[0]);
+    exit(EXIT_FAILURE);
+  }
+  int jobs_count, capacity;
+  Job **jobs = read_input(argv[1], &capacity, &jobs_count);
+  Heap *threadpool = halloc(capacity);
+  int thread_time[capacity];
+  init_threadpool(threadpool, thread_time);
+
+  int time = 0;
+  for (int i = 0; i < jobs_count; i++) {
+    process_job(threadpool, jobs[i], &time, thread_time);
+    free(jobs[i]);
+  }
+
+  free_heap(threadpool);
+  free(jobs);
+  return 0;
+}
+
+
+void process_job(Heap *h, Job *j, int *time, int *thread_time) {
+  if (!h->size) {
+    (*time)++;
+    free_threads(h);
+  }
+  int thread = extract_min(h);
+  printf("%d %d ", thread, thread_time[thread]);
+  thread_time[thread] = *time + j->duration;
+}
+
+void free_threads(Heap *h) {
+  for (int i = 0; i < h->capacity; i++)
+    insert(h, i);
+}
+
+void init_threadpool(Heap *h, int *thread_time) {
+  for (int i = 0; i < h->capacity; i++) {
+    thread_time[i] = 0;
+    insert(h, i);
+  }
+}
+
+void insert(Heap *h, int x) {
+  if (h->size == h->capacity) {
+    fprintf(stderr, "Heap of %d is full!", h->capacity);
+    exit(EXIT_FAILURE);
+  }
+  h->xs[h->size] = x;
+  siftupmin(h, h->size);
+  h->size++;
+}
+
+void siftupmin(Heap *h, int i) {
+  int parent_i = floor((i - 1) / 2);
+  if (h->xs[parent_i] <= h->xs[i])
+    return;
+  swap(&h->xs[parent_i], &h->xs[i]);
+  siftupmin(h, parent_i);
+}
+
+void siftdownmin(Heap *h, int i) {
+  int left_i = 2*i + 1, right_i = 2*i + 2,
+    min_index;
+  if (right_i >= h->size)
+    right_i = left_i;
+  if (left_i >= h->size)
+    return;
+  min_index = min_i(right_i, left_i, h->xs);
+  if (min_index <= h->size && h->xs[i] > h->xs[min_index]) {
+    swap(&h->xs[min_index], &h->xs[i]);
+    siftdownmin(h, min_index);
+  }
+}
+
+int extract_min(Heap *h) {
+  if (h->size == 0) {
+    fprintf(stderr, "The heap is empty, extraction failed");
+    exit(EXIT_FAILURE);
+  }
+  swap(&h->xs[0], &h->xs[--(h->size)]);
+  siftdownmin(h, 0);
+  return h->xs[h->size];
+}
+
+void swap(int *a, int *b) {
+  int t = *a;
+  *a = *b, *b = t;
+}
+
+Job **read_input(char *filename, int *threads, int *jobs_count) {
+  char *line = (char *) malloc(MAXINPUT);
+  size_t line_size = MAXINPUT;
+  FILE *input;
+  if ((input = fopen(filename, "r")) == NULL) {
+    fprintf(stderr, "File %s could not be opened", filename);
+    exit(EXIT_FAILURE);
+  }
+
+  if (getline(&line, &line_size, input) < 0) {
+    fprintf(stderr, "File %s is empty", filename);
+    exit(EXIT_FAILURE);
+  }
+  sscanf(line, "%d %d", threads, jobs_count);
+  if ((int) getline(&line, &line_size, input) < *jobs_count) {
+    fprintf(stderr, "File %s needs at %d jobs",
+	    filename, *jobs_count);
+    exit(EXIT_FAILURE);
+  }
+  int i = 0;
+
+  Job **buf = (Job **) malloc(sizeof(Job *) * *jobs_count);
+  char *linei = line;
+  while (i < *jobs_count) {
+    int space = isspace(*linei);
+    int digit = isdigit(*linei);
+    if (!space && digit) {
+      buf[i] = jalloc(i, *linei - '0');
+      i++;
+    }
+    else if (!space && !digit)
+      break;
+    linei++;
+  }
+  if (i < *jobs_count) {
+    fprintf(stderr, "File %s needs at %d jobs, found %d",
+	    filename, *jobs_count, i);
+    exit(EXIT_FAILURE);
+  }
+  free(line);
+  fclose(input);
+  return buf;
+}
+
+void print_heap(Heap *h)  {
+  for (int i = 0; i < h->size; i++)
+    printf("%d:", h->xs[i]);
+
+  putchar('\n');
+}
+		</code></pre>
+            </main>
+	    <a id="back" href="../index.html">.back</a>
+	</article>
+    </body>
+</html>

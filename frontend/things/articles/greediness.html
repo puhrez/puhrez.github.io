@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+	<title> Greediness: Sorting for Somewhat Success | Michael Pérez</title>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0" name="viewport">
+        <meta name="description" content="Michael Pérez is a programmer, writer, and cook">
+        <meta name="og:title" content="Michael Pérez | Programmer, writer, cook">
+        <meta name="og:description" content="Michael Pérez is a programmer, writer, and cook">
+        <link href="../../styles.css" rel="stylesheet">
+	<link ref="shortcut icon" href="../../assets/favicon.ico">
+    </head>
+    <body>
+	<article id="post">
+            <main>
+		<h3>Greediness: Sorting for Somewhat Success</h3>
+		<p>While when first confronted with a problem, it may seem unqiue, and perhaps unsolvable, with time and research we can often find the moving parts behind a problem. These gears often grind similiarily to other problems we have solved. Approaches to algorithm design generally build on these abstract similiarities of solutions and problems so that a system of design, though diverse on a semantic or lexical level, share syntaxical structures and can help us make out the possible to solutions to new problems. <a href="https://en.wikipedia.org/wiki/Einstellung_effect">The Eistelung effect</a> is a phenomenon where such familiar strides may provide false comfort that lead away from appropriate decisions, clouding and closing minds with worn keys and disparate locks. Since this is meant to be helpful documentation, however, such troubles will (maybe) talk about another day.</p>
+		<p>Here's classic problem we can use to guide us through, given a set of denominations in some currency and an amount in said currency, what is the minimal collection of denominations we need to reach that amount?</p>
+		<p>This is also known as the <a href="https://en.wikipedia.org/wiki/Change-making_problem">money-change problem.</a> An example: with coins worth 1, 5, and 10, what's the best way to change 28?</p>
+		<p><span class="blackout">With 6 coins, 10, 10, 5, 1, 1, 1</span> we do it.</p>
+		<p>How can we write the code to solve this. One way to think about this problem, and the approach I'm expounding is this post is that when trying to make a greedy decision, i.e. a decision that leads us to an optimal solution, is to sort the different choices we can make any point in time according to some heuristic.</p>
+		<p>And like that, we can translate a problem solvable through greediness to the problem of determining what heuristic to sort our choices by. In this case, since we're trying to minimize the amount of currency used, descending by value since like the natural choice. With our denominations sorted, as we make change, all we have to do is choose the largest denomination that is equal to or less than the amount of change we have (left) to give.</p>
+		<p>Working out the above example verbally, at first we are given 28, our denominations (sorted) are 10, 5, 1.</p>
+		<p>With 20, we can use a 10, leaving 18.</p>
+		<p>With 18 we can use a 10, leaving 8.</p>
+		<p>Since 8 is less than 10, we can't use it, but we can use a 5, leaving 3.</p>
+		<p>Since 3 is less than 10 and 5, we can't use them, but we can use 1, until we've reached 28 in total change</p>
+		<p>I leave the code to the reader as an exercise.</p>
+		<p>Greediness as any moral compass might suggest, isn't <b>always</b> good, and in algoritm design the advice is no different. This happens when making a greedy choice changes things such that the next best choice can't be made. An example: In addition to the denominations 1, 5, and 10, if we have 9 aswell, a greedy solution will not be optimal for 28. The greedy solution would result in 6 coins, while another appoach would result in <span class="blackout">4</span>.</p>
+		<p>This other approach will be discussed in another post, soon.</p>
+            </main>
+	    <a id="back" href="../index.html">.back</a>
+	</article>
+    </body>
+</html>

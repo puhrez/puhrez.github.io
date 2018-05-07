@@ -97,6 +97,11 @@ blockquote {
 #intro {
     animation: fadein 2s;
 }
+
+.blackout {
+    background-color: #262626;
+}
+
 @media (max-width: 800px) {
     main {
 	margin-top: -10%;
