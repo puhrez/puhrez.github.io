@@ -1,6 +1,4 @@
 body, html {
-    height: 100%;
-    margin: 0;
     opacity: 1;
     background: #FAFAFA;
 }
@@ -103,12 +101,17 @@ blockquote {
 }
 
 @media (max-width: 800px) {
-    main {
-	margin-top: -10%;
+    #intro {
+        height: 100vh;
     }
 }
 
 @media (min-width: 800px) {
+    body, html {
+        height: 100%;
+        margin: 0;
+    }
+
     main {
 	width: 80%;
     }
