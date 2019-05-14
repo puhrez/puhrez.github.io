@@ -1236,6 +1236,19 @@
             <fieldset>
                 <a id="downloadLink" href="#map" download="map.svg"><button type="button">Download Map as SVG</button></a>
             </fieldset>
+            <fieldset>
+                <label>Low Count: </label><span id="low-count">N/A</span>
+            </fieldset>
+            <fieldset>
+                <label>Mid Low: </label><span id="mid-low-count">N/A</span>
+            </fieldset>
+            <fieldset>
+                <label>Mid High: </label><span id="mid-high-count">N/A</span>
+            </fieldset>
+            <fieldset>
+                <label>High: </label><span id="high-count">N/A</span>
+            </fieldset>
+
         </form>
         </section>
         <script>
@@ -1257,7 +1270,11 @@
                  highColor = document.getElementById(
                      'high-color').value,
                  inputs = document.querySelectorAll(
-                     '#state-inputs input');
+                     '#state-inputs input'),
+                 lowCount = 0,
+                 midLowCount = 0,
+                 midHighCount = 0,
+                 highCount = 0;
 
              inputs.forEach(function (el) {
                  var state = el.id.split('-')[0],
@@ -1267,18 +1284,26 @@
                      color;
 
                  if (stateVal < low) {
-                     color = !invert ? lowColor : highColor
+                     color = !invert ? lowColor : highColor;
+                     lowCount += 1;
                  } else if (stateVal < mid) {
-                     color = !invert ? midLowColor : midHighColor
+                     color = !invert ? midLowColor : midHighColor;
+                     midLowCount += 1;
                  } else if (stateVal < high) {
-                     color = !invert ? midHighColor : midLowColor
+                     color = !invert ? midHighColor : midLowColor;
+                     midHighCount += 1;
                  } else if (stateVal >= high) {
-                     color = !invert ? highColor : lowColor
+                     color = !invert ? highColor : lowColor;
+                     highCount += 1;
                  }
 
-                 stateEl.style.fill = color || stateEl.style.fill
-                 if (stateBox) stateBox.style.fill = color || stateBox.style.fill
+                 stateEl.style.fill = color || stateEl.style.fill;
+                 if (stateBox) stateBox.style.fill = color || stateBox.style.fill;
+             })
+             var d = [['low', lowCount], ['mid-low', midLowCount], ['mid-high', midHighCount], ['high', highCount]];
 
+             d.forEach(function(data) {
+                 document.getElementById(data[0] + '-count').textContent = data[1]
              })
 
          }
