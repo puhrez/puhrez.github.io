@@ -18,8 +18,8 @@ To build (minify, gziped, etc) for local production testing:
 $ make build
 ```
 
-To pubish to AWS:
+To pubish to AWS and github:
 
 ```bash
-$ make front
+$ make public
 ```
