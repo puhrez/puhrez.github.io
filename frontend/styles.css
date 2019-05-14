@@ -19,10 +19,12 @@ main, article, nav, section {
     align-items: center;
     justify-content: center;
 }
-
+article, nav {
+    margin: 0 10%;
+}
 article {
     height: auto;
-    margin: 0 10%;
+
     justify-content: space-around;
 }
 
