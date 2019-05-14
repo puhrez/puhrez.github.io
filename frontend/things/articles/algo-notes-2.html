@@ -1,0 +1,25 @@
+<!doctype html>
+<head>
+    <title>Algo Notes: Count Primes | Michael Pérez</title>
+    <meta charset="utf-8">
+    <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0" name="viewport">
+    <meta name="description" content="Michael Pérez is a programmer, writer, and cook">
+    <meta name="og:title" content="Michael Pérez | Programmer, writer, cook">
+    <meta name="og:description" content="Michael Pérez is a programmer, writer, and cook">
+    <link href="../../styles.css" rel="stylesheet">
+    <link ref="shortcut icon" href="../../assets/favicon.ico">
+</head>
+<body>
+    <article class="post">
+        <main>
+            <h3>Algo Notes: Count Primes</h3>
+            <a href="https://leetcode.com/problems/count-primes/">Description of problem here</a>
+            <br>
+            <p>Supposedly an easy problem, for those unfamiliar with number theory just the base premise pushes one to research how to determine if a number if a prime. There are variety of solutions from large n optimized probabilistic approaches, to more heuristic. However whether n is a prime is just a subproblem here, while many of the latter heuristic approaches can be memorized and serve rather performantly, a more intuitive approach which addresses the problem itself is the Sieve of Eratosthenes.</p>
+            <p>The basic intuition behind the Sieve of Eratosthenes is that for multiple of a prime is not a prime. We use this by iterating over from 2 until n marking each (easily achieved through a secondary list or using a set) of its multiples as nonprime and incrementing our prime counter, unless the current number has already been marked as prime.</p>
+            <p>Implementing this algorithm is rather straightforward once you decide how to "mark" a int. However, no matter if the algorithm is right, sometimes large <em>n</em>'s just take a long time. Running a python version on 1500000 takes around a second on LeetCode, violating the time limitation. Writing a basic C version, though, easily reduces this time to 16ms. Both are rather readability, so this becomes a question of computational performance vs intelligibility. While I highly doubt applying a probabilistic method will get python to perform as quickly as the Sieve of Eratosthenes in C, even if it were to, it'd be much more obscure for non-critical use optimizing for maintainability.
+                <p>Update: several updates can be made to severely optimize the sieve such using a half sieve which involves iterating from 2 until the square root of <em>n - 1</em>, not <em>n</em>. The idea being that the square root of a prime is also prime, because otherwise those factors could be multiplied together in some fashion to get the number in question.</p>
+        </main>
+        <a class="back" href="../index.html">.back</a>
+    </article>
+</body>

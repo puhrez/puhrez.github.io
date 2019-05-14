@@ -1,0 +1,38 @@
+<!doctype html>
+<head>
+    <title>Data & Reality Takeaways - Part 1: Entities | Michael Pérez</title>
+    <meta charset="utf-8">
+    <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0" name="viewport">
+    <meta name="description" content="Michael Pérez is a programmer, writer, and cook">
+    <meta name="og:title" content="Michael Pérez | Programmer, writer, cook">
+    <meta name="og:description" content="Michael Pérez is a programmer, writer, and cook">
+    <link href="../../styles.css" rel="stylesheet">
+    <link ref="shortcut icon" href="../../assets/favicon.ico">
+</head
+<body>
+    <article class="post">
+        <main>
+            <h3>Data & Reality Takeaways - Part 1: Entities</h3>
+            <small>This is the first part of a series (hopefully) relating different ideas, approaches, etc. from reading <a href="https://github.com/jhulick/bookstuff/blob/master/Data%20and%20Reality.pdf">William Kent's Data & Reality.</a></small>
+            <br>
+            <p>Data professionals have their hands guided by technologies and techniques of past training and implementations, business professionals have their minds walled in by procedures the software they use impose upon them. In this way, organizational praxis cements the semantic gap between technologists and users; from an IT point-of-view, to protect the data from their users and their users from the incoherent of dirty data, from a user's, to protect themselves from irrelevant complexity and the inconsistencies of dirty development.</p>
+            <blockquote>
+                <q>The assumptions appropriate to the content of one application may not fit the contexts of other applications... Thus, a "thing" here is a very arbitrary segment partitioned out a continuum</q>
+            </blockquote>
+            <p>Much data work can be reduced to working around questions of oneness, sameness, and categories. As relevant to data modelling, it's much better to deal with these on the write layer(s) as opposed to exposing data rot for developer-users to deal with themselves.<p>Oneness, i.e. "what is one thing?", is inherit in the ambiguity of natural language. It's immensity is exacerbated by (at worst) conflicting requirements from the variety of perspectives dependent on a single data system. These issues, however, can be mitigated through potentially cascading write processes whose queryable destinations are explicitly scoped, somehow.<p>Sameness, i.e. "when do we say two things are the same, or the same thing", is determined by the perspective being applied to a phenomena. Appropriating Whorf's example described in the book, fresh snow and iced snow to a Puerto Rican might be the same, but to an Inuit they are very different. How does one delineate definition and processes for a thing such as snow which would allow for both Puerto Ricans and Inuits to acquire useful information? Models born of a general, root definition would fall prey to the latent assumptions lie buried inside the concept of "most general".</p>
+                <blockquote>
+                    <q>How much change can something undergo and still be the "same thing"?</q>
+                </blockquote>
+                <p>Sameness and change is a space/time relationship disambiguated from continuity. An entity, in this case a unit of space, can only change through some progression of time otherwise its final state would be the initial percieved state. Both this last statement and the general idea of continuity are both deep questions crossing many fields of study. Depending on the requirements a useful paradigm is immutability. A changed thing is never the thing it was, but it can be the same kind of thing.</p>
+                <blockquote>
+                    <q>There is no natural set of categories. The set of categories to be maintained in an information system must be specified for that system... but categories may be defined at different levels of refinement.</q>
+                </blockquote>
+                <p>A framework of classification is bound to context from which or/and for which it was devised. Trying to over-extend the usefulness of these types swiftly leads one to incoherence and deep data stink, common causes of early morning customer success calls. A tangential, yet relevant, approach to the issues of addressed by / related to intermingling categories is <a href="https://martinfowler.com/bliki/CQRS.html">CQRS</a>, which is based on the use of different models, different categories for write and read operations.</p>
+                <blockquote>
+                    <q>One more: we are not modeling reality, but the way information about reality is processed, by people</q>
+                </blockquote>
+                <p>Arguably, the entire book begins, develops, and ends with this proposition. Definitely framed phenomenologically, but that isn't so bad isn't? Isn't it the intention to capture and understand (perhaps for a purpose) a variable set of occurrences? Nouns and the verbs connecting them are tools our language has given to describe our real world and now we relabel them as entities and relationships. Kent posits though, that is necessary to separate our projections from our problems, lest we accommodate ourselves into the comforts of context-resolvable ambiguity that discourses allows, only to later find realize our information systems are not discourses, but monologues where developer-users are only privy to subordinate clauses.</p>
+        </main>
+        <a class="back" href="../index.html">.back</a>
+    </article>
+</body>

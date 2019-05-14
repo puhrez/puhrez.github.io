@@ -1,0 +1,23 @@
+<!doctype html>
+<head>
+    <title>Algo Notes: Jump Game 2 | Michael Pérez</title>
+    <meta charset=utf-8>
+    <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0" name="viewport">
+    <meta name="description" content="Michael Pérez is a programmer, writer, and cook">
+    <meta name="og:title" content="Michael Pérez | Programmer, writer, cook">
+    <meta name="og:description" content="Michael Pérez is a programmer, writer, and cook">
+    <link href="../../styles.css" rel="stylesheet">
+    <link ref="shortcut icon" href="../../assets/favicon.ico">
+</head>
+<body>
+    <article class="post">
+        <main>
+            <h3>Algo Notes: Jump Game 2</h3>
+            <a href="https://leetcode.com/problems/jump-game-ii/">Description of problem here</a>
+            <br>
+            <p>The first impression is that prehaps the best jump to make is one that'll allow for most jump length since this step will lead to least total jumps because the <em>further</em> we can move from a given step the better. Unfortunately this is not always true, since the step one can move <em>farthest away</em> from might not be the step one can move <em>farthest down</em> the array from. This is the difference between jump length and reach.</p>
+            <p>Imagine an array, <code>[10,9,8,7,6,5,4,3,2,1,1,0]</code>, choosing the next step to be the one with the most jump length results in 10 jumps. If we consider the next best step (the greedy choice) to be the one with the most reach, however, results in 2 since the first jump will be the the penulatimate element with a reach of 11, and it's one step til the end (the only available step).</p>
+        </main>
+        <a class="back" href="../index.html">.back</a>
+    </article>
+</body>

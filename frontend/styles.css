@@ -1,11 +1,19 @@
-body, html {
-    opacity: 1;
-    background: #FAFAFA;
+:root {
+    --main-bg-color: #FAFAFA;
+    --main-font-family: "Lucida Sans Typewriter", "Lucida Console", monaco, "Bitstream Vera Sans Mono", monospace;
+    --main-text-color: #262626;
+    --accent-text-color: #2196f3;
+    --accent-highlight-text-color: #00BCD4;
 }
 
-main, article {
-    font-family: "Lucida Sans Typewriter", "Lucida Console", monaco, "Bitstream Vera Sans Mono", monospace;
-    color: #262626;
+body, html {
+    opacity: 1;
+    background: var(--main-bg-color);
+}
+
+main, article, nav, section {
+    font-family: var(--main-font-family);
+    color: var(--main-text-color);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -13,23 +21,25 @@ main, article {
 }
 
 article {
-    height: 100%;
+    height: auto;
     margin: 0 10%;
     justify-content: space-around;
 }
 
-article#post {
-    height: auto;
-}
+
 main {
     width: 100%;
 }
-a:hover {
-    color: #00BCD4;
-}
+
 a {
-    color: #2196F3;
+    text-decoration: none;
+    color: var(--accent-text-color);
 }
+
+a:hover {
+    color: var(--accent-highlight-text-color);
+}
+
 p {
     margin: 0;
     align-self: flex-start;
@@ -40,11 +50,15 @@ main > p  + p {
 h1 {
     margin: 8px 0;
 }
-h3 {
-    border-bottom: 2px dashed #262626;
+
+h3, h4  {
+    border-bottom: 2px dashed var(--main-text-color);
     font-style: italic;
-    padding-bottom: 4px;
-    letter-spacing: 1px;
+    padding-bottom: .3em;
+    letter-spacing: .04em;
+}
+.post h3, .post h4 {
+    width: 100%;
 }
 
 ul {
@@ -52,7 +66,8 @@ ul {
     padding: 0;
     list-style: none;
 }
-#post li {
+
+.post li {
     text-align: left;
     padding-left: 10px;
     margin-top: 10px;
@@ -86,10 +101,23 @@ blockquote {
     font-style: italic;
     font-size: 16px;
 }
-#back {
+
+.back {
+    border: 1px solid var(--accent-text-color);
+    color: var(--accent-text-color);
+    padding: 5px 10px;
     margin-top: 10px;
     margin-bottom: 30px;
     align-self: flex-end;
+    transition: all .2s ease-out;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.15);
+}
+
+.back:hover {
+    box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.24);
+    color: var(--main-bg-color);
+    background-color: var(--accent-highlight-text-color);
+    border-color: var(--accent-highlight-text-color);
 }
 
 #intro {
@@ -108,6 +136,16 @@ blockquote {
 @media (min-width: 800px) {
     main {
 	width: 80%;
+    }
+    h3, h4 {
+        font-size: 1.95em;
+    }
+    p, small {
+        line-height: 1.5em;
+    }
+    blockquote {
+        margin-top: 2.5vh;
+        margin-bottom: 2.5vh;
     }
 }
 

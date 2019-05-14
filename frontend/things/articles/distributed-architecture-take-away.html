@@ -11,7 +11,7 @@
 	<link ref="shortcut icon" href="../../assets/favicon.ico">
     </head>
     <body>
-	<article id="post">
+	<article class="post">
             <main>
 		<h3>Distributed Architectures: (Some) Take Aways</h3>
 		<blockquote>The goal is to minimize the effect of a failure. Embrace the fact that failures will happen and design to handle them.</blockquote>
@@ -49,7 +49,7 @@
 		<p>Finally, a note about the relationship between availability and scalability.</p>
 		<p>Beginning with some semantics, scalability is the capacity of a system to adapt itself to dynamic levels of load. The ability for a given service to distribute its load among instances of itself is often a characteristic of a scalable system, however if a single instance is able to handle indefinite amounts of operations, this too is scalable. Availability, on another limb, is a characteristic of a system describing its likelihood of being available and ready to perform its task(s). Scalability and availability are often related in discourse because the former helps to account for the fallacies surrounding the dependencies of the latter. As an example, while a single instance of a service may be highly reliable because it's supported by a reliable power supply, a reliable network connection, and reliable internal devices, it's availability depends on the reliability of these parts it could not operate dependibly without. Scalability allows a system to mitigate the risk of depdning on <a href="http://www.rgoarchitects.com/Files/fallacies.pdf.">inherently unreliable components</a> by commoditizing services to the point that it's physical dependicies, which make it available, don't matter.</p>
             </main>
-	    <a id="back" href="../index.html">.back</a>
+	    <a class="back" href="../index.html">.back</a>
 	</article>
     </body>
 </html>

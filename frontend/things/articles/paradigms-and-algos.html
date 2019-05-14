@@ -11,7 +11,7 @@
 	<link ref="shortcut icon" href="../../assets/favicon.ico">
     </head>
     <body>
-	<article id="post">
+	<article class="post">
             <main>
 		<h3>Different approaches to algorithm implementation</h3>
 		<p>Let's consider first a cannonical, multi-paradigmal algorithm.</p>
@@ -98,7 +98,7 @@ end
 		<p>Although being able to isolate the recursive base case in Elixir via multiple dispatch isn't of much significance, it succiciently demonstrates how the functional mindset differentiates the Elxir version of <code>merge</code>. Like the previous fibonacci example, where the imperative approach required the developer to consider and program what to do at every iteration (and even after the iteration concluded), Python's <code>merge</code> imperative underpinnings result in an understandable, yet circuitous, implementation..</p>
 		<p>Since, however, Elixir is a functional progamming language that disallows mutation, discourages indexing, but permits function guards and multiple dispatch, we can write <code>merge</code> in a much more explicit way; dividing the logic into private functions using declarative, pattern matched argument values to isolate the different cases merge sort specifies.</p>
             </main>
-	    <a id="back" href="../index.html">.back</a>
+	    <a class="back" href="../index.html">.back</a>
 	</article>
     </body>
 </html>
