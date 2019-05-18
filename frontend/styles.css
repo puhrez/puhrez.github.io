@@ -59,14 +59,22 @@ h3, h4  {
     padding-bottom: .3em;
     letter-spacing: .04em;
 }
-.post h3, .post h4 {
-    width: 100%;
+
+
+h4 {
+    margin-right: auto;
+    width: fit-content;
+    border-bottom-width: 1px;
 }
 
 ul {
     margin: 0;
     padding: 0;
     list-style: none;
+}
+
+.post h3 {
+    width: 100%;
 }
 
 .post li {
@@ -146,9 +154,13 @@ hr {
     main {
 	width: 80%;
     }
-    h3, h4 {
+    h3 {
         font-size: 1.95em;
     }
+    h4 {
+        font-size: 1.4em;
+    }
+
     p, small {
         line-height: 1.5em;
     }

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <head>
+	<title>Software Saturdays: 05/18/2019 | Michael Pérez</title>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0" name="viewport">
+        <meta name="description" content="Michael Pérez is a programmer, writer, and cook">
+        <meta name="og:title" content="Michael Pérez | Programmer, writer, cook">
+        <meta name="og:description" content="Michael Pérez is a programmer, writer, and cook">
+        <link href="/styles.css" rel="stylesheet">
+	<link ref="shortcut icon" href="/favicon.ico">
+    </head>
+    <body>
+	<article class="post">
+            <main>
+		<h3>Software Saturdays: 05/18/2019</h3>
+                <h4><a href="https://www.cs.cmu.edu/~aldrich/courses/654-sp08/notes/3-hoare-notes.pdf">Hoare Logic Lecture Notes</a></h4>
+                <p>An introduction to (Floyd-)Hoare Logic, a logical framework for software specifications, that demonstrates use through a formal proof of a exponentiation function. Specification are structured in triplets of propositional logic statements called Hoare Triples composed of <code>p</code>, a precondition, <code>c</code>, a computation, <code>q</code>, a postcondition. The notation varies depending on the kind of specification declares. Total correctness statements are articulated <code>[p]c[q]</code>, partially correct statements <code>{p}c{q}</code>. The difference between the two centers around termination, whole total correctness implies <code>c</code>’s termination given <code>p</code>’s validity, partially correct does not, decoupling <code>c</code>’s termination with <code>p</code>’s validity, instead asserting that <code>q</code> is implied if <code>c</code> terminates and <code>p</code> is valid.<p>
+                    <h4><a href="https://stevemcconnell.com/articles/missing-in-action-information-hiding/">Missing in Action: Information Hiding (1996)</a></h4>
+                    <p>Information Hiding as a paradigm for encapsulation. Basically, when looking at functionality thinking of the implementation in terms of what the public shouldn’t worry about. A well develop example that was used was and auto ID increment. Starts off as an incrementation and definition statement (<code>newId: int = ++currID: int</code>) but then requires changes like changing <code>int</code> to <code>str</code>, and instead of just changing declarations, using an <code>IDTYPE</code> alias to refer to whatever type is needed, as well as hiding the ID creation behind some sort of function/interface. Asking what to hide might help find reasonable designs when thinking about objects/classes might overburden the initiative. </p>
+                    <h4><a href="https://www.student.cs.uwaterloo.ca/~cs492/11public_html/p18-smith.pdf">The Limits of Correctness (1985)</a></h4>
+                    <p>A rather ethical take on the idea of software verification, i.e. the idea that in some automated way a system can determine correct. The argument uses exploits the weaknesses of abstraction to highlight the inherent flaws of modelling as the core reasons why verification is a misleading and immoral term, that relative consistency would be more apt. Relative consistency because correctness verification, for example, as expressed in Hoare Logic, is theoretically dependent on the on defined (pre|post)conditions and pragmatically dependent on the measurable strengths of these propositions. Measuring here, being another articulation of modelling, thus the approach is deeply plagued by the inevitable partiality of any projection (model) of any infinite space (reality).</p>
+            </main>
+	    <a class="back" href="../index.html">.back</a>
+	</article>
+    </body>
+</html>
