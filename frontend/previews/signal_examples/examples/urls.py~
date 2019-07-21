@@ -1,0 +1,11 @@
+app_name = 'examples'
+
+urlpatterns = (
+    path('/view', ViewLogicExample.as_view(),
+         name='view-based-example'),
+    path('/serializer', SerializerLogicExample.as_view(),
+         name='serializer-based-example'),
+    path('/serializer-from-manager', SerializerFromManagerExample.as_view(),
+         name='serializer-from-manager'),
+    path('/publish', PublishBook.as_view(), name='publish-book')
+)

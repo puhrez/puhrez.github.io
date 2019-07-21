@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Puhrez Patterns: Relational Logic | Michael Pérez</title>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0" name="viewport">
+        <meta name="description" content="Michael Pérez is a programmer, writer, and cook. This is an article about using signals for data logic across models.">
+        <meta name="og:title" content="Michael Pérez | Programmer, writer, cook | Puhrez Patterns: Django Signals">
+        <meta name="og:description" content="Michael Pérez is a programmer, writer, and cook. This is an article about using signals for data logic across models.">
+        <link href="/styles.css" rel="stylesheet">
+        <link ref="shortcut icon" href="/favicon.ico">
+    </head>
+    <body>
+        <article class="post">
+            <main>
+              <h3>Puhrez Patterns: Relational Logic</h3>
+              <p>The backbone of many Django applications is the business logic that manipulates and queries different domain entities persisted in a database. Often, some business logic has to affect multiple domain entities and we developers are left to our devices in order to reflect that in our systems.</p>
+              <p>There are various way to proceed depending on what stack is behind your Django service.</p>
+              <p>Using Django REST framework, much this logic can be defined in a Serializer's <code>create</code> or <code>update</code> methods.</p>
+              <p>With vanilla Django there are other ways. Much like REST's Serializer, Django forms also allow one to include  multimodel business logic in definitions for update and creation mechanisms. Depending on the relationship between a model and another, method definitions in a Model subclass or in a Manager subclass could contain this logic. It can even be explicitly written into the view.</p>
+              <p>Each approach is unique. Django forms and REST Serializers are great for contextually expressing enrichment logic (hashing a secret, for example) and handling one-to-one and one-to-many relationships. Unfortunately, this pattern implicitly requires that every model instatiation/modification go through those code paths to support the domain specification.</p>
+              <!-- insert REST example -->
+              <p>This last point generally pushes one to move such logic to a Manager subclass. Here some are expressed more fluidly since they are defined in terms of some parent domain model, such a <code>Page</code> when duplicated duplicates each Subpage that can be duplicated with <code>Page.objects.duplicate(pk=page.pk).</code></p>
+              <!-- insert Manager example -->
+              <p>This centralizes the logic and it's idiomatic with most ORM operations, but it doesn't express certain relationships well, like many-to-many and many-to-one.</p><p>While <!-- insert refs --> sometimes ostracized, Django Signals are a great way to express these relationships, consolidating this logic and keeping intermodel nuances from becoming cumbersome.</p>
+              <!-- Insert signal examples -->
+              <p>After all these patterns, seeing the code, and thinking for a bit about reality, reader might think to themselves, well most of this is just the organization of application level logic, really much of the logic could and should be expressed at a database level through triggers, constraints, and in some cases views to ensure consolidation, conceptual integrity, and portability. To this I say yes, reader, you are correct. Some <!-- link papers --> papers about data integrity point out that at some point of load the application layer fails leading to inconsistent, untrustable data.</p>
+              <p>However, sometimes an individual contributor isn't imbued with the power to affect things at a database layer and their only recourse is application level logic, if the toolbox is Django and friends, the above list of patterns and comments will hopefully help them.</p>
+            </main>
+            <a class="back" href="../index.html">.back</a>
+        </article>
+    </body>
+</html>

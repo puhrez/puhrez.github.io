@@ -1,0 +1,157 @@
+<!doctype html>
+<head>
+    <title>torero | Michael Pérez</title>
+    <meta charset="utf-8">
+    <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0" name=viewport>
+    <meta name="description" content="torero is a game of reflex and carnage">
+    <meta name="og:title" content="torero | Michael Pérez">
+    <meta name="og:description" content="torero is a game of reflex and carnage">
+    <link ref="shortcut icon" href="/favicon.ico">
+    <style>
+     .character {
+         width: 30px;
+         height: 30px;
+         position: absolute;
+         transform-origin: center center;
+     }
+     #arena {
+         width: 400px;
+         height: 400px;
+         position: relative;
+         background-color: #212212;
+     }
+     #toro {
+         bottom: 5px;
+         right: 5px;
+     }
+     #toro__body {
+         background-color: #b200b2;
+         height: 100%;
+         width: 100%;
+         transform-origin: center center;
+     }
+     #toro__load {
+         background-color: #e36b64;
+         height: 100%;;
+         width: 100%;
+         transform-origin: bottom;
+     }
+
+     #torero {
+         top: 5px;
+         left: 5px;
+         background-color: #00b200;
+     }
+    </style>
+</head>
+<body>
+    <div id="arena">
+        <div id="torero" class="character" data-x="0" data-y="0"></div>
+        <div id="toro" class="character" data-thrustx="0" data-thrusty="0" data-x="0" data-y="0">
+            <div id="toro__body" data-rotation="0"/>
+            <div id="toro__load" data-load="0"></div>
+        </div>
+    </div>
+    <script>
+     const TORERO = document.getElementById('torero'),
+           TORO = document.getElementById('toro'),
+           TORO_LOAD = document.getElementById('toro__load'),
+           TORO_BODY = document.getElementById('toro__body'),
+           ARENA = document.getElementById('arena'),
+           THRUST_BY_LOAD_MULTIPLIER = 60;
+
+     let keysDown = {
+         'ArrowLeft': false,
+         'ArrowUp': false,
+         'ArrowRight': false,
+         'ArrowDown': false,
+         'Space': false
+     };
+
+     function onKeydown(event) {
+         keysDown[event.code] = true
+     };
+
+     function onKeyup(event) {
+         keysDown[event.code] = false;
+     };
+
+     function handleOutOfBounds(entity) {
+         if (entity.dataset.x > ARENA.offsetWidth - 40) entity.dataset.x = ARENA.offsetWidth - 40;
+         else if (entity.dataset.x < 0) entity.dataset.x = 0
+         if (entity.dataset.y > ARENA.offsetHeight - 40) entity.dataset.y = ARENA.offsetHeight - 40;
+         else if (entity.dataset.y < 0) entity.dataset.y = 0;
+     };
+
+     function handleToreroInput() {
+         let x = parseInt(TORERO.dataset.x);
+         let y = parseInt(TORERO.dataset.y);
+
+         if (keysDown['ArrowLeft']) x -= 5;
+         if (keysDown['ArrowRight']) x += 5;
+         if (keysDown['ArrowUp']) y -= 5;
+         if (keysDown['ArrowDown']) y += 5;
+
+         TORERO.dataset.x = x;
+         TORERO.dataset.y = y;
+         handleOutOfBounds(TORERO)
+         TORERO.style.transform = `translate(${TORERO.dataset.x}px, ${TORERO.dataset.y}px)`;
+     };
+
+     function handleToroInput() {
+         let rotation = parseInt(TORO_BODY.dataset.rotation),
+             thrustx = parseFloat(TORO.dataset.thrustx),
+             thrusty = parseFloat(TORO.dataset.thrusty),
+             load = parseFloat(TORO_LOAD.dataset.load);
+
+         // rotation in degree to radians (unit for the length of an arc)
+         const theta = (rotation + 90) * (Math.PI/180);
+
+         if (!keysDown['Space']) {
+             if (load > 0) {
+                 thrusty = Math.sin(theta) * load * THRUST_BY_LOAD_MULTIPLIER;
+                 thrustx = Math.cos(theta) * load * THRUST_BY_LOAD_MULTIPLIER;
+
+                 load = load - .05;
+             } else {
+                 thrusty = 0
+                 thrustx = 0
+                 rotation += 5;
+             }
+         } else {
+             thrusty = 0;
+             thrustx = 0;
+             load = (load + .01) % 1;
+         }
+
+         TORO_LOAD.dataset.load = load;
+         TORO_LOAD.style.transform = `scaleY(${TORO_LOAD.dataset.load})`
+         TORO_BODY.dataset.rotation = rotation % 360
+         TORO_BODY.style.transform = `rotate(${TORO_BODY.dataset.rotation}deg)`
+         TORO.dataset.thrustx = thrustx
+         TORO.dataset.thrusty = thrusty
+         TORO.dataset.x = thrustx + parseInt(TORO.dataset.x)
+         TORO.dataset.y = thrusty + parseInt(TORO.dataset.y)
+         handleOutOfBounds(TORO)
+         TORO.style.transform = `translate(${-TORO.dataset.x}px, ${-TORO.dataset.y}px)`;
+     };
+
+     function handleInput() {
+         handleToreroInput();
+         handleToroInput();
+     };
+
+     function update() {
+         handleInput();
+         window.requestAnimationFrame(update);
+     };
+
+     function setupGame() {
+         document.addEventListener('keydown', onKeydown);
+         document.addEventListener('keyup', onKeyup);
+         window.requestAnimationFrame(update);
+     };
+
+     setupGame();
+    </script>
+</body>
