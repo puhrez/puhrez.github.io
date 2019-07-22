@@ -93,6 +93,10 @@
     </div>
     <section id="instructions">
         <h1>Toro y tú</h1>
+        <h3>Scoreboard</h3>
+        <p><strong>Toro:</strong> <span id="toro__points">0</span></p>
+        <p><strong>Torero:</strong> <span id="torero__points">0</span></p>
+        <hr>
         <h3>How to play</h3>
         <p>One player is the toro, another is the torero.</p>
         <p>The toro is controlled with the spacebar, holding down will charge a forward thrust.</p>
@@ -106,6 +110,8 @@
            TORO_LOAD = document.getElementById('toro__load'),
            TORO_BODY = document.getElementById('toro__body'),
            ARENA = document.getElementById('arena'),
+           TORO_POINTS = document.getElementById('toro__points'),
+           TORERO_POINTS = document.getElementById('torero__points'),
            THRUST_BY_LOAD_MULTIPLIER = 70,
            MOVE_INCREMENT = 4,
            ROTATION_INCREMENT = 5,
@@ -143,11 +149,11 @@
      };
 
      function toroWin() {
-         console.log('toro won')
+         TORO_POINTS.innerText = parseInt(TORO_POINTS.innerText) + 1
      }
 
      function toreroWin() {
-         console.log('torero win')
+         TORERO_POINTS.innerText = parseInt(TORERO_POINTS.innerText) + 1
      }
 
      // MUTATIONS
