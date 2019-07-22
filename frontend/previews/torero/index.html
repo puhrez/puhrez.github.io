@@ -8,6 +8,9 @@
     <meta name="og:description" content="torero is a game of reflex and carnage">
     <link ref="shortcut icon" href="/favicon.ico">
     <style>
+     h1, h2, h3, h4, h5, h6, p {
+         font-family: monospace;
+     }
      .character {
          width: 30px;
          height: 30px;
@@ -20,16 +23,19 @@
          position: relative;
          background-color: #212212;
      }
+
      #toro {
          bottom: 5px;
          right: 5px;
      }
+
      #toro__body {
          background-color: #b200b2;
          height: 100%;
          width: 100%;
          transform-origin: center center;
      }
+
      #toro__load {
          background-color: #e36b64;
          height: 100%;;
@@ -42,64 +48,132 @@
          left: 5px;
          background-color: #00b200;
      }
+     #torero__cape {
+         width: 30px;
+         height: 15px;
+         background-color: #00b2b2;
+         position: relative;
+         top: 5px;
+         left: 100%;
+         display: none;
+     }
+     .toro__horn {
+         width: 7px;
+         height: 7px;
+         top: -2px;
+         position: absolute;
+         background-color: #dfe568;
+     }
+
+     #toro__horn--left {
+         left: 2.5px;
+     }
+
+     #toro__horn--right {
+         right: 2.5px;
+     }
+
+     #instructions {
+         width: 400px;
+     }
     </style>
 </head>
 <body>
     <div id="arena">
-        <div id="torero" class="character" data-x="0" data-y="0"></div>
+        <div id="torero" class="character" data-x="0" data-y="0">
+            <div id="torero__cape"></div>
+        </div>
         <div id="toro" class="character" data-thrustx="0" data-thrusty="0" data-x="0" data-y="0">
             <div id="toro__body" data-rotation="0"/>
             <div id="toro__load" data-load="0"></div>
+            <div id="toro__horn--left" class="toro__horn"></div>
+            <div id="toro__horn--right" class="toro__horn"></div>
         </div>
     </div>
+    </div>
+    <section id="instructions">
+        <h1>Toro y tú</h1>
+        <h3>How to play</h3>
+        <p>One player is the toro, another is the torero.</p>
+        <p>The toro is controlled with the spacebar, holding down will charge a forward thrust.</p>
+        <p>The torero is controlled with the arrow keys, enter unleashes their cape.</p>
+        <p>The toro should go after the torero, but avoid the torero's cape.</p>
+    </section>
     <script>
      const TORERO = document.getElementById('torero'),
+           TORERO_CAPE = document.getElementById('torero__cape'),
            TORO = document.getElementById('toro'),
            TORO_LOAD = document.getElementById('toro__load'),
            TORO_BODY = document.getElementById('toro__body'),
            ARENA = document.getElementById('arena'),
-           THRUST_BY_LOAD_MULTIPLIER = 60;
+           THRUST_BY_LOAD_MULTIPLIER = 70,
+           MOVE_INCREMENT = 4,
+           ROTATION_INCREMENT = 5,
+           LOAD_COOLDOWN = .05,
+           LOAD_INCREMENT = .01;
 
      let keysDown = {
          'ArrowLeft': false,
          'ArrowUp': false,
          'ArrowRight': false,
          'ArrowDown': false,
-         'Space': false
+         'Space': false,
+         'Enter': false
      };
 
-     function onKeydown(event) {
-         keysDown[event.code] = true
+     // MAIN LOGIC
+
+     function update() {
+         updateTorero();
+         updateToro();
+         const gameOver = detectCollisions();
+
+         if (gameOver) setupGame();
+         else window.requestAnimationFrame(update);
      };
 
-     function onKeyup(event) {
-         keysDown[event.code] = false;
+     function setupGame() {
+         document.addEventListener('keydown', onKeydown);
+         document.addEventListener('keyup', onKeyup);
+         window.requestAnimationFrame(update);
+         resetToro();
+         resetTorero();
+         updateToro();
+         updateTorero();
      };
 
-     function handleOutOfBounds(entity) {
-         if (entity.dataset.x > ARENA.offsetWidth - 40) entity.dataset.x = ARENA.offsetWidth - 40;
-         else if (entity.dataset.x < 0) entity.dataset.x = 0
-         if (entity.dataset.y > ARENA.offsetHeight - 40) entity.dataset.y = ARENA.offsetHeight - 40;
-         else if (entity.dataset.y < 0) entity.dataset.y = 0;
-     };
+     function toroWin() {
+         console.log('toro won')
+     }
 
-     function handleToreroInput() {
+     function toreroWin() {
+         console.log('torero win')
+     }
+
+     // MUTATIONS
+
+     function updateTorero() {
          let x = parseInt(TORERO.dataset.x);
          let y = parseInt(TORERO.dataset.y);
 
-         if (keysDown['ArrowLeft']) x -= 5;
-         if (keysDown['ArrowRight']) x += 5;
-         if (keysDown['ArrowUp']) y -= 5;
-         if (keysDown['ArrowDown']) y += 5;
+         if (keysDown['Enter'] && !TORERO_CAPE.style.display.length) TORERO_CAPE.style.display = 'block'
+         else if (!keysDown['Enter'] && TORERO_CAPE.style.display == 'block') TORERO_CAPE.style.display = ''
+
+         if (keysDown['ArrowLeft']) x -= MOVE_INCREMENT;
+         if (keysDown['ArrowRight']) x += MOVE_INCREMENT;
+         if (keysDown['ArrowUp']) y -= MOVE_INCREMENT;
+         if (keysDown['ArrowDown']) y += MOVE_INCREMENT;
 
          TORERO.dataset.x = x;
          TORERO.dataset.y = y;
-         handleOutOfBounds(TORERO)
+
+         handleOutOfBounds(TORERO);
+
          TORERO.style.transform = `translate(${TORERO.dataset.x}px, ${TORERO.dataset.y}px)`;
      };
 
-     function handleToroInput() {
-         let rotation = parseInt(TORO_BODY.dataset.rotation),
+     function updateToro() {
+         let rotation = parseFloat(TORO_BODY.dataset.rotation),
              thrustx = parseFloat(TORO.dataset.thrustx),
              thrusty = parseFloat(TORO.dataset.thrusty),
              load = parseFloat(TORO_LOAD.dataset.load);
@@ -112,46 +186,86 @@
                  thrusty = Math.sin(theta) * load * THRUST_BY_LOAD_MULTIPLIER;
                  thrustx = Math.cos(theta) * load * THRUST_BY_LOAD_MULTIPLIER;
 
-                 load = load - .05;
+                 load = Math.max(load - LOAD_COOLDOWN, 0);
              } else {
-                 thrusty = 0
-                 thrustx = 0
-                 rotation += 5;
+                 thrusty = 0;
+                 thrustx = 0;
+                 rotation += ROTATION_INCREMENT;
              }
          } else {
              thrusty = 0;
              thrustx = 0;
-             load = (load + .01) % 1;
+             load = (load + LOAD_INCREMENT) % 1;
          }
 
          TORO_LOAD.dataset.load = load;
-         TORO_LOAD.style.transform = `scaleY(${TORO_LOAD.dataset.load})`
-         TORO_BODY.dataset.rotation = rotation % 360
-         TORO_BODY.style.transform = `rotate(${TORO_BODY.dataset.rotation}deg)`
-         TORO.dataset.thrustx = thrustx
-         TORO.dataset.thrusty = thrusty
-         TORO.dataset.x = thrustx + parseInt(TORO.dataset.x)
-         TORO.dataset.y = thrusty + parseInt(TORO.dataset.y)
-         handleOutOfBounds(TORO)
+         TORO_LOAD.style.transform = `scaleY(${TORO_LOAD.dataset.load})`;
+
+         TORO_BODY.dataset.rotation = rotation % 360;
+         TORO_BODY.style.transform = `rotate(${TORO_BODY.dataset.rotation}deg)`;
+
+         TORO.dataset.thrustx = thrustx;
+         TORO.dataset.thrusty = thrusty;
+         TORO.dataset.x = thrustx + parseInt(TORO.dataset.x);
+         TORO.dataset.y = thrusty + parseInt(TORO.dataset.y);
+
+         handleOutOfBounds(TORO);
          TORO.style.transform = `translate(${-TORO.dataset.x}px, ${-TORO.dataset.y}px)`;
      };
 
-     function handleInput() {
-         handleToreroInput();
-         handleToroInput();
+     function detectCollisions() {
+         if (checkCollision(TORO, TORERO)) {
+             toroWin();
+             return true
+         }
+
+         if (checkCollision(TORO, TORERO_CAPE)) {
+             toreroWin();
+             return true
+         }
      };
 
-     function update() {
-         handleInput();
-         window.requestAnimationFrame(update);
+     function resetToro() {
+         TORO_BODY.dataset.rotation = 0;
+         TORO_LOAD.dataset.load = 0;
+         TORO.dataset.thrustx = 0;
+         TORO.dataset.thrusty = 0;
+         TORO.dataset.x = 0;
+         TORO.dataset.y = 0;
      };
 
-     function setupGame() {
-         document.addEventListener('keydown', onKeydown);
-         document.addEventListener('keyup', onKeyup);
-         window.requestAnimationFrame(update);
+     function resetTorero() {
+         TORERO.dataset.x = 0;
+         TORERO.dataset.y = 0;
      };
 
+     // HELPERS
+
+     function onKeydown(event) {
+         keysDown[event.code] = true;
+     };
+
+     function onKeyup(event) {
+         keysDown[event.code] = false;
+     };
+
+     function handleOutOfBounds(entity) {
+         if (entity.dataset.x > ARENA.offsetWidth - 40) entity.dataset.x = ARENA.offsetWidth - 40;
+         else if (entity.dataset.x < 0) entity.dataset.x = 0;
+         if (entity.dataset.y > ARENA.offsetHeight - 40) entity.dataset.y = ARENA.offsetHeight - 40;
+         else if (entity.dataset.y < 0) entity.dataset.y = 0;
+     };
+
+     function checkCollision(entityA, entityB) {
+         const a = entityA.getBoundingClientRect(),
+               b = entityB.getBoundingClientRect(),
+               xCollision = a.x >= b.left && a.x <= b.right || b.x >= a.left && b.x <= a.right,
+               yCollision = a.y >= b.top && a.y < b.bottom || b.y >= a.top && b.y < a.bottom;
+
+         return xCollision && yCollision
+     };
+
+     // INIT
      setupGame();
     </script>
 </body>
