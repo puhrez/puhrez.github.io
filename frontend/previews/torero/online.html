@@ -145,9 +145,9 @@
     <div id="screen__wrapper">
         <div id="arena" class="screen">
             <div id="torero" class="character" data-x="0" data-y="0">
-                <div id="torero__cape"></div>
+                <div id="torero__cape" data-visible="false"></div>
             </div>
-            <div id="toro" class="character" data-thrustx="0" data-thrusty="0" data-x="0" data-y="0">
+            <div id="toro" class="character" data-x="0" data-y="0">
                 <div id="toro__body" data-rotation="0">
                     <div id="toro__load" data-load="0"></div>
                     <div id="toro__horn--left" class="toro__horn"></div>
@@ -175,62 +175,46 @@
         <hr>
         <h3>How to play</h3>
         <p>One player is the toro, another is the torero.</p>
-        <p>The toro is controlled with the spacebar, holding down will charge a forward thrust.</p>
+        <p>The toro is rotated with "A" and "D", holding down the spacebar will charge a forward thrust.</p>
         <p>The torero is controlled with the arrow keys, enter unleashes their cape.</p>
         <p>The toro should go after the torero, but avoid the torero's cape.</p>
     </section>
     <script>
-     const TORERO = document.getElementById('torero'),
+
+     const WS = new WebSocket('ws://localhost:8765'),
+           ARENA_SCREEN = document.getElementById('arena'),
+           USER_SELECT_SCREEN = document.getElementById('user-select'),
+           WAITING_SCREEN = document.getElementById('waiting'),
+           WAITING_PROMPT_EL = document.getElementById('waiting__prompt'),
+           TORERO = document.getElementById('torero'),
            TORERO_CAPE = document.getElementById('torero__cape'),
            TORO = document.getElementById('toro'),
            TORO_LOAD = document.getElementById('toro__load'),
            TORO_BODY = document.getElementById('toro__body'),
-           ARENA = document.getElementById('arena'),
+           TORO_KEYS = new Set(['Space', 'KeyA', 'KeyD']),
+           TORERO_KEYS = new Set(['ArrowLeft', 'ArrowUp', 'ArrowRight', 'ArrowDown', 'Enter']),
            TORO_POINTS = document.getElementById('toro__points'),
            TORERO_POINTS = document.getElementById('torero__points'),
-           USER_SELECT = document.getElementById('user-select'),
-           WS = new WebSocket('ws://localhost:8765'),
-           WAITING_PROMPT_EL = document.getElementById('waiting__prompt'),
-           THRUST_BY_LOAD_MULTIPLIER = 70,
-           MOVE_INCREMENT = 4,
-           ROTATION_INCREMENT = 5,
-           LOAD_COOLDOWN = .05,
-           LOAD_INCREMENT = .01,
            USER_TYPES = Object.freeze({
                TORO: Symbol.for('TORO'),
                TORERO: Symbol.for('TORERO'),
                SPECTATOR: Symbol.for('SPECTATOR')
            });
 
-     let keysDown = {
-         'ArrowLeft': false,
-         'ArrowUp': false,
-         'ArrowRight': false,
-         'ArrowDown': false,
-         'Space': false,
-         'Enter': false
-     }, USER_TYPE = null,
+     let KEYS_DOWN = Array.from(TORO_KEYS).concat(Array.from(TORERO_KEYS)).reduce(
+         (rv, k) => {
+             rv[k] = false
+             return rv
+         },  {}),
+         USER_TYPE = null,
          WAITING_PROMPT_INTERVAL = null;
-
-     // MAIN LOGIC
-
-     function update() {
-         updateTorero();
-         updateToro();
-         const gameOver = detectCollisions();
-
-         if (gameOver) setupGame();
-         else window.requestAnimationFrame(update);
-     };
 
      function setupGame() {
          document.addEventListener('keydown', onKeydown);
          document.addEventListener('keyup', onKeyup);
-         window.requestAnimationFrame(update);
-         resetToro();
-         resetTorero();
-         updateToro();
-         updateTorero();
+
+         setToro();
+         setTorero();
      };
 
      function toroWin() {
@@ -241,110 +225,83 @@
          TORERO_POINTS.innerText = parseInt(TORERO_POINTS.innerText) + 1
      }
 
-     // MUTATIONS
+     function getToro() {
+         return {
+             rotation: parseFloat(TORO_BODY.dataset.rotation),
+             load: parseFloat(TORO_LOAD.dataset.load),
+             x: parseFloat(TORO.dataset.x),
+             y: parseFloat(TORO.dataset.y)
+         }
+     }
 
-     function updateTorero() {
-         let x = parseInt(TORERO.dataset.x);
-         let y = parseInt(TORERO.dataset.y);
+     function getTorero() {
+         return {
+             x: parseFloat(TORERO.dataset.x),
+             y: parseFloat(TORERO.dataset.y),
+             show_cape: KEYS_DOWN.Enter
+         }
+     }
 
-         if (keysDown['Enter'] && !TORERO_CAPE.style.display.length) TORERO_CAPE.style.display = 'block'
-         else if (!keysDown['Enter'] && TORERO_CAPE.style.display == 'block') TORERO_CAPE.style.display = ''
+     function setToro({rotation = 0, load = 0, x = 0, y = 0}={}) {
+         TORO_BODY.dataset.rotation = rotation;
+         TORO_LOAD.dataset.load = load;
+         TORO.dataset.x = x;
+         TORO.dataset.y = y;
+         TORO_LOAD.style.transform = `scaleY(${TORO_LOAD.dataset.load})`;
+         TORO_BODY.style.transform = `rotate(${TORO_BODY.dataset.rotation}deg)`;
+         TORO.style.transform = `translate(${-TORO.dataset.x}px, ${-TORO.dataset.y}px)`;
 
-         if (keysDown['ArrowLeft']) x -= MOVE_INCREMENT;
-         if (keysDown['ArrowRight']) x += MOVE_INCREMENT;
-         if (keysDown['ArrowUp']) y -= MOVE_INCREMENT;
-         if (keysDown['ArrowDown']) y += MOVE_INCREMENT;
+     };
 
+     function setTorero({show_cape = false, x = 0, y = 0}={}) {
          TORERO.dataset.x = x;
          TORERO.dataset.y = y;
-
-         handleOutOfBounds(TORERO);
-
+         if (show_cape) TORERO_CAPE.style.display = 'block'
+         else TORERO_CAPE.style.display = 'none'
          TORERO.style.transform = `translate(${TORERO.dataset.x}px, ${TORERO.dataset.y}px)`;
      };
 
-     function updateToro() {
-         let rotation = parseFloat(TORO_BODY.dataset.rotation),
-             thrustx = parseFloat(TORO.dataset.thrustx),
-             thrusty = parseFloat(TORO.dataset.thrusty),
-             load = parseFloat(TORO_LOAD.dataset.load);
+     // HELPERS
 
-         // rotation in degree to radians (unit for the length of an arc)
-         const theta = (rotation + 90) * (Math.PI/180);
+     function shouldPersistKeyEvent(event) {
+         return USER_TYPE == USER_TYPES.TORO && TORO_KEYS.has(event.code)
+             || USER_TYPE == USER_TYPES.TORERO && TORERO_KEYS.has(event.code)
+     };
 
-         if (!keysDown['Space']) {
-             if (load > 0) {
-                 thrusty = Math.sin(theta) * load * THRUST_BY_LOAD_MULTIPLIER;
-                 thrustx = Math.cos(theta) * load * THRUST_BY_LOAD_MULTIPLIER;
-
-                 load = Math.max(load - LOAD_COOLDOWN, 0);
-             } else {
-                 thrusty = 0;
-                 thrustx = 0;
-                 rotation += ROTATION_INCREMENT;
-             }
-         } else {
-             thrusty = 0;
-             thrustx = 0;
-             load = (load + LOAD_INCREMENT) % 1;
+     function onKeydown(event) {
+         if (shouldPersistKeyEvent(event)) {
+             KEYS_DOWN[event.code] = true;
+             sendInput();
          }
+     };
 
-         TORO_LOAD.dataset.load = load;
-         TORO_LOAD.style.transform = `scaleY(${TORO_LOAD.dataset.load})`;
+     function onKeyup(event) {
+         if (shouldPersistKeyEvent(event)) {
+             KEYS_DOWN[event.code] = false;
+             sendInput();
+         }
+     };
 
-         TORO_BODY.dataset.rotation = rotation % 360;
-         TORO_BODY.style.transform = `rotate(${TORO_BODY.dataset.rotation}deg)`;
+     function handleOutOfBounds(entity) {
+         if (entity.dataset.x > ARENA_SCREEN.offsetWidth - 40)
+             entity.dataset.x = ARENA_SCREEN.offsetWidth - 40;
+         else if (entity.dataset.x < 0) entity.dataset.x = 0;
 
-         TORO.dataset.thrustx = thrustx;
-         TORO.dataset.thrusty = thrusty;
-         TORO.dataset.x = thrustx + parseInt(TORO.dataset.x);
-         TORO.dataset.y = thrusty + parseInt(TORO.dataset.y);
-
-         handleOutOfBounds(TORO);
-         TORO.style.transform = `translate(${-TORO.dataset.x}px, ${-TORO.dataset.y}px)`;
+         if (entity.dataset.y > ARENA_SCREEN.offsetHeight - 40)
+             entity.dataset.y = ARENA_SCREEN.offsetHeight - 40;
+         else if (entity.dataset.y < 0) entity.dataset.y = 0;
      };
 
      function detectCollisions() {
          if (checkCollision(TORO, TORERO)) {
              toroWin();
-             return true
+             return true;
          }
 
          if (checkCollision(TORO, TORERO_CAPE)) {
              toreroWin();
-             return true
+             return true;
          }
-     };
-
-     function resetToro() {
-         TORO_BODY.dataset.rotation = 0;
-         TORO_LOAD.dataset.load = 0;
-         TORO.dataset.thrustx = 0;
-         TORO.dataset.thrusty = 0;
-         TORO.dataset.x = 0;
-         TORO.dataset.y = 0;
-     };
-
-     function resetTorero() {
-         TORERO.dataset.x = 0;
-         TORERO.dataset.y = 0;
-     };
-
-     // HELPERS
-
-     function onKeydown(event) {
-         keysDown[event.code] = true;
-     };
-
-     function onKeyup(event) {
-         keysDown[event.code] = false;
-     };
-
-     function handleOutOfBounds(entity) {
-         if (entity.dataset.x > ARENA.offsetWidth - 40) entity.dataset.x = ARENA.offsetWidth - 40;
-         else if (entity.dataset.x < 0) entity.dataset.x = 0;
-         if (entity.dataset.y > ARENA.offsetHeight - 40) entity.dataset.y = ARENA.offsetHeight - 40;
-         else if (entity.dataset.y < 0) entity.dataset.y = 0;
      };
 
      function checkCollision(entityA, entityB) {
@@ -360,14 +317,17 @@
 
      // 1. prompt to pick user
      function selectUser(event) {
+         if (!event.target.dataset.user) return
          USER_TYPE = USER_TYPES[event.target.dataset.user]
+
          if (USER_TYPE == USER_TYPES.TORO)
              document.getElementById('scoreboard__toro').classList.add('selected')
          else if (USER_TYPE == USER_TYPES.TORERO)
              document.getElementById('scoreboard__torero').classList.add('selected')
          else if (USER_TYPE == USER_TYPES.SPECTATOR)
              document.getElementById('scoreboard__spectator').innerText = '(You are spectating)'
-         USER_SELECT.style.display = 'none'
+
+         USER_SELECT_SCREEN.style.display = 'none'
          attemptConnect()
      }
 
@@ -377,44 +337,101 @@
          WS.send(JSON.stringify({type: 'connect',
                                  user_type: USER_TYPE ? Symbol.keyFor(USER_TYPE) : null}))
      }
+
      function setGameID(id) {
-         const gameRoomEl = document.getElementById('game-room-id')
-         gameRoomEl.innerHTML = `Game ID: ${id}`
+         const gameIdEl = document.getElementById('game-room-id');
+
+         if (id) gameIdEl.innerHTML = `Game ID: ${id}`;
+         else gameIdEl.innerHTML = '';
      }
 
      function handleCreate({room_id}) {
-         setGameID(room_id)
+         setGameID(room_id);
+     }
+
+     function setSpectatorCopy(raw_count) {
+         let count = raw_count;
+         let spectatorCopy = '';
+
+         if (USER_TYPE == USER_TYPES.SPECTATOR) {
+             count -= 1;
+
+             if (!count)
+                 spectatorCopy = '(You are spectating)';
+             else if (count > 1)
+                 spectatorCopy = `(You are spectating with ${count} others)`;
+             else spectatorCopy = `(You are spectating with ${count} other)`;
+         } else if (count) {
+             if (count > 1)
+                 spectatorCopy = `(${count} others are spectating)`
+             else spectatorCopy = `(${count} other is spectating)`;
+         }
+
+         document.getElementById('scoreboard__spectator').innerText = spectatorCopy;
      }
 
      function handleJoin({room_id, user_type, complete, spectator_count}) {
-         setGameID(room_id)
-         const count = USER_TYPE == USER_TYPES.SPECTATOR ? spectator_count - 1 : spectator_count;
-         let spectator_copy;
-         if (count) {
-             if (USER_TYPE == USER_TYPES.SPECTATOR) {
-                 spectator_copy = count > 1 ? `(You are spectating with ${count} others)` :
-                                  `(You are spectating with ${count} other)`
-             } else {
-                 spectator_copy = count > 1 ? `(${count} others are spectating)` :
-                                        `(${count} other is spectating)`
-             }
-             document.getElementById('scoreboard__spectator').innerText = spectator_copy
+         setGameID(room_id);
+         setSpectatorCopy(spectator_count);
+
+         if (complete) {
+             WAITING_SCREEN.style.display = 'none'
+             setupGame();
+         }
+     }
+
+     function endGame() {
+         USER_SELECT_SCREEN.style.display = '';
+         WAITING_SCREEN.style.display = '';
+
+         for (let e of document.getElementsByClassName('selected'))
+             e.classList.remove('selected');
+         setGameID();
+     }
+
+     function handleLeave({spectator_count, propagate}) {
+         setSpectatorCopy(spectator_count);
+
+         if (propagate) endGame();
+     }
+
+     function handleUpdate({keys, user_type, character}) {
+         Object.assign(KEYS_DOWN, keys)
+
+         if (USER_TYPES[user_type] == USER_TYPES.TORO)
+             setToro(character)
+         else if (USER_TYPES[user_type] == USER_TYPES.TORERO)
+             setTorero(character)
+
+         if (detectCollisions()) {
+             document.removeEventListener('keydown', onKeydown);
+             document.removeEventListener('keyup', onKeyup);
+             console.log('game over')
          }
      }
 
      const WSHandlers = Object.freeze({
          create: handleCreate,
-         join: handleJoin
+         join: handleJoin,
+         leave: handleLeave,
+         update: handleUpdate
      })
 
      WS.onmessage = function (frame) {
          const message = JSON.parse(frame.data)
-         if (message.type != 'error')
-             WSHandlers[message.type](message)
+
+         if (message.type != 'error') {
+             try {
+                 WSHandlers[message.type](message)
+             } catch (e) {
+                 console.error(`Unhandled message ${message}`)
+                 throw e
+             }
+         }
          else console.error(message)
      }
 
-     USER_SELECT.addEventListener('click', selectUser)
+     USER_SELECT_SCREEN.addEventListener('click', selectUser)
 
      // 2. wait for other player
      function updateWaitingPrompt() {
@@ -423,7 +440,8 @@
          if (USER_TYPE == USER_TYPES.SPECTATOR) prompt = 'Finding players...'
          else prompt = `Finding a ${USER_TYPE == USER_TYPES.TORO ? 'Torero' : 'Toro'}...`
 
-         // gotta us innerHTML because innerText trims the string preventing incremts to length upon first encountered space
+         // gotta us innerHTML because innerText trims the string preventing
+         // increments to length upon first encountered space
          if (WAITING_PROMPT_EL.innerHTML.length == prompt.length)
              WAITING_PROMPT_EL.innerHTML = ''
          else
@@ -432,6 +450,27 @@
      }
 
      // 3. setup game
-     setupGame();
+     function sendInput() {
+         if (USER_TYPE == USER_TYPES.SPECTATOR) return
+         let keySet;
+
+         if (USER_TYPE == USER_TYPES.TORERO) {
+             keySet = TORERO_KEYS
+             character = getTorero()
+             console.log(character)
+         } else if (USER_TYPE == USER_TYPES.TORO) {
+             keySet = TORO_KEYS
+             character = getToro()
+         }
+
+         const keys = Array.from(keySet)
+                           .reduce(
+                               (rv, k) => {
+                                   rv[k] = KEYS_DOWN[k]
+                                   return rv
+                               }, {})
+
+         WS.send(JSON.stringify({type: 'input', keys, character}))
+     }
     </script>
 </body>
