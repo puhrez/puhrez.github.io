@@ -15,7 +15,7 @@ class ToroWebSocketAPI:
                     await self._send_to_socket(websocket, e.serialize())
                     raise e
         finally:
-            await self.game.leave_room(websocket)
+            await self.game.leave_room_if_connected(websocket)
 
     async def handle_frame(self, websocket, frame):
         try:

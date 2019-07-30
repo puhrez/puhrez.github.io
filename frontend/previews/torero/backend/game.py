@@ -29,11 +29,12 @@ class Game:
 
         character = world.handle_input(user, message)
 
-        resp = dict(type='update',
-                    character=character._asdict(),
-                    user_type=user.type)
+        if character:
+            resp = dict(type='update',
+                        character=character._asdict(),
+                        user_type=user.type)
 
-        await self.announce_to_room(room, resp)
+            await self.announce_to_room(room, resp)
 
     def create_user(self, websocket, room_id, user_type):
         user = self.USER_MODEL(room_id=room_id, type=user_type)
@@ -143,10 +144,12 @@ class Game:
         end_match = not room.sockets or user.type in base.PLAYABLE_USER_TYPES
 
         if end_match:
+            for socket in room.sockets:
+                del self._socket_to_user[socket]
             rooms.pop(room.id)
 
         await self.announce_leave_room(room, propagate=end_match)
 
     async def leave_room_if_connected(self, websocket):
         if websocket in self._socket_to_user:
-            return self.leave_room(websocket)
+            await self.leave_room(websocket)

@@ -43,6 +43,11 @@ def handle_input(user, message):
 
 
 def update_torero(keys, torero):
+    if not (keys['ArrowLeft'] or keys['ArrowRight']
+            or keys['ArrowUp'] or keys['ArrowDown']) \
+            and not (torero.show_cape or keys['Enter']):
+        return
+
     newX = torero.x
     newY = torero.y
 
@@ -61,7 +66,12 @@ def update_torero(keys, torero):
 
 def update_toro(keys, toro):
     # rotation in degree to radians (unit for the length of an arc)
+    if not (keys['KeyA'] or keys['KeyD'] or keys['Space']) \
+       and toro.load <= 0:
+        return
+
     newRotation = toro.rotation
+    newLoad = 0
     theta = (toro.rotation + 90) * (math.pi/180)
 
     newThrusty = 0
@@ -73,7 +83,7 @@ def update_toro(keys, toro):
         newThrustx = math.cos(theta) * toro.load \
             * base.THRUST_BY_LOAD_MULTIPLIER
         newLoad = max(toro.load - base.LOAD_COOLDOWN, 0)
-    else:
+    elif keys['Space']:
         newLoad = (toro.load + base.LOAD_INCREMENT) % 1
 
     if keys['KeyD']:
